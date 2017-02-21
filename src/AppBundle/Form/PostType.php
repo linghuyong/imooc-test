@@ -39,12 +39,12 @@ class PostType extends AbstractType
         //     $builder->add('title', null, array('required' => false, ...));
 
         $builder
-            ->add('title', null, array(
+            ->add('title_assert', null, array(
                 'attr' => array('autofocus' => true),
                 'label' => 'label.title',
             ))
-            ->add('summary', 'Symfony\Component\Form\Extension\Core\Type\TextareaType', array('label' => 'label.summary'))
-            ->add('content', null, array(
+            ->add('summary_assert', 'Symfony\Component\Form\Extension\Core\Type\TextareaType', array('label' => 'label.summary'))
+            ->add('content_assert', "textarea", array(
                 'attr' => array('rows' => 20),
                 'label' => 'label.content',
             ))

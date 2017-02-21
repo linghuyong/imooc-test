@@ -70,13 +70,23 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface
     {
         foreach (range(1, 30) as $i) {
             $post = new Post();
-
-            $post->setTitle($this->getRandomPostTitle());
-            $post->setSummary($this->getRandomPostSummary());
-            $post->setSlug($this->container->get('slugger')->slugify($post->getTitle()));
-            $post->setContent($this->getPostContent());
             $post->setAuthorEmail('anna_admin@symfony.com');
             $post->setPublishedAt(new \DateTime('now - '.$i.'days'));
+
+            $title = $this->getRandomPostTitle();
+            $summary = $this->getRandomPostSummary();
+            $content = $this->getPostContent();
+
+            $post->setLocale("en");
+            $post->setTitle($title["en"]);
+            $post->setSummary($summary["en"]);
+            $post->setSlug($this->container->get('slugger')->slugify($title['en']));
+            $post->setContent($content["en"]);
+
+            $post->setLocale("zh");
+            $post->setTitle($title["zh"]);
+            $post->setSummary($summary["zh"]);
+            $post->setContent($content["zh"]);
 
             foreach (range(1, 5) as $j) {
                 $comment = new Comment();
@@ -106,7 +116,7 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface
 
     private function getPostContent()
     {
-        return <<<MARKDOWN
+        $content_en = <<<MARKDOWN
 Lorem ipsum dolor sit amet consectetur adipisicing elit, sed do eiusmod tempor
 incididunt ut labore et **dolore magna aliqua**: Duis aute irure dolor in
 reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
@@ -142,10 +152,37 @@ congue nisl dictum. Donec mollis nisl tortor, at congue erat consequat a. Nam
 tempus elit porta, blandit elit vel, viverra lorem. Sed sit amet tellus
 tincidunt, faucibus nisl in, aliquet libero.
 MARKDOWN;
+
+        $content_zh = <<<MARKDOWN
+这是一段中文描述
+
+  * 看不懂德语
+  * 随便写点吧
+  * 最后一条
+
+后面不写了。
+MARKDOWN;
+
+        return [
+            'en' => $content_en,
+            'zh' => $content_zh
+        ];
     }
 
-    private function getPhrases()
+    private function getPhrases($locale=null)
     {
+        if ($locale == "zh") {
+            return [
+                "短句一",
+                "短句二",
+                "短句三",
+                "短句四",
+                "短句五",
+                "短句六",
+                "短句七",
+                "短句八",
+            ];
+        }
         return array(
             'Lorem ipsum dolor sit amet consectetur adipiscing elit',
             'Pellentesque vitae velit ex',
@@ -167,19 +204,31 @@ MARKDOWN;
 
     private function getRandomPostTitle()
     {
-        $titles = $this->getPhrases();
+        $titles_en = $this->getPhrases();
+        $titles_zh = $this->getPhrases('zh');
 
-        return $titles[array_rand($titles)];
+        return [
+            'en' => $titles_en[array_rand($titles_en)],
+            'zh' => $titles_zh[array_rand($titles_zh)]
+        ];
     }
 
     private function getRandomPostSummary($maxLength = 255)
     {
         $phrases = $this->getPhrases();
-
         $numPhrases = mt_rand(6, 12);
         shuffle($phrases);
+        $summary_en = substr(implode(' ', array_slice($phrases, 0, $numPhrases-1)), 0, $maxLength);
 
-        return substr(implode(' ', array_slice($phrases, 0, $numPhrases-1)), 0, $maxLength);
+        $phrases = $this->getPhrases('zh');
+        $numPhrases = mt_rand(6, 12);
+        shuffle($phrases);
+        $summary_zh = substr(implode(' ', array_slice($phrases, 0, $numPhrases-1)), 0, $maxLength);
+
+        return [
+            'en' => $summary_en,
+            'zh' => $summary_zh
+        ];
     }
 
     private function getRandomCommentContent()

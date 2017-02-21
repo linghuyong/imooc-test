@@ -71,6 +71,7 @@ class BlogController extends Controller
     {
         $post = new Post();
         $post->setAuthorEmail($this->getUser()->getEmail());
+        $post->setLocale($request->getLocale());
 
         // See http://symfony.com/doc/current/book/forms.html#submitting-forms-with-multiple-buttons
         $form = $this->createForm('AppBundle\Form\PostType', $post)
@@ -145,10 +146,12 @@ class BlogController extends Controller
 
         $entityManager = $this->getDoctrine()->getManager();
 
+        $post->getAsserts();
         $editForm = $this->createForm('AppBundle\Form\PostType', $post);
         $deleteForm = $this->createDeleteForm($post);
 
         $editForm->handleRequest($request);
+        $post->setAsserts();
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $post->setSlug($this->get('slugger')->slugify($post->getTitle()));

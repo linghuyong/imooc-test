@@ -36,10 +36,14 @@ class Post
     private $id;
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank()
+     * @ORM\Column(type="json_array")
      */
     private $title;
+
+    /**
+     * @Assert\NotBlank()
+     */
+    private $title_assert;
 
     /**
      * @ORM\Column(type="string")
@@ -47,17 +51,25 @@ class Post
     private $slug;
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank(message="post.blank_summary")
+     * @ORM\Column(type="json_array")
      */
     private $summary;
 
     /**
-     * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="post.blank_summary")
+     */
+    private $summary_assert;
+
+    /**
+     * @ORM\Column(type="json_array")
+     */
+    private $content;
+
+    /**
      * @Assert\NotBlank(message="post.blank_content")
      * @Assert\Length(min = "10", minMessage = "post.too_short_content")
      */
-    private $content;
+    private $content_assert;
 
     /**
      * @ORM\Column(type="string")
@@ -81,10 +93,32 @@ class Post
      */
     private $comments;
 
+    // used for display
+    private $locale = "en";
+
     public function __construct()
     {
         $this->publishedAt = new \DateTime();
         $this->comments = new ArrayCollection();
+    }
+
+    public function getAsserts()
+    {
+        $this->title_assert = $this->getTitle();
+        $this->summary_assert = $this->getSummary();
+        $this->content_assert = $this->getContent();
+    }
+
+    public function setAsserts()
+    {
+        $this->setTitle($this->title_assert);
+        $this->setSummary($this->summary_assert);
+        $this->setContent($this->content_assert);
+    }
+
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
     }
 
     public function getId()
@@ -94,12 +128,17 @@ class Post
 
     public function getTitle()
     {
-        return $this->title;
+        return array_key_exists($this->locale, $this->title) ? $this->title[$this->locale] : "";
+    }
+
+    public function getTitleAssert()
+    {
+        return $this->title_assert;
     }
 
     public function setTitle($title)
     {
-        $this->title = $title;
+        $this->title[$this->locale] = $title;
     }
 
     public function getSlug()
@@ -114,12 +153,17 @@ class Post
 
     public function getContent()
     {
-        return $this->content;
+        return array_key_exists($this->locale, $this->content) ? $this->content[$this->locale] : "";
+    }
+
+    public function getContentAssert()
+    {
+        return $this->content_assert;
     }
 
     public function setContent($content)
     {
-        $this->content = $content;
+        $this->content[$this->locale] = $content;
     }
 
     public function getAuthorEmail()
@@ -172,11 +216,55 @@ class Post
 
     public function getSummary()
     {
-        return $this->summary;
+        return array_key_exists($this->locale, $this->summary) ? $this->summary[$this->locale] : "";
+    }
+
+    public function getSummaryAssert()
+    {
+        return $this->summary_assert;
     }
 
     public function setSummary($summary)
     {
-        $this->summary = $summary;
+        $this->summary[$this->locale] = $summary;
+    }
+
+    /**
+     * Set title_assert
+     *
+     * @param array $titleAssert
+     * @return Post
+     */
+    public function setTitleAssert($titleAssert)
+    {
+        $this->title_assert = $titleAssert;
+
+        return $this;
+    }
+
+    /**
+     * Set summary_assert
+     *
+     * @param array $summaryAssert
+     * @return Post
+     */
+    public function setSummaryAssert($summaryAssert)
+    {
+        $this->summary_assert = $summaryAssert;
+
+        return $this;
+    }
+
+    /**
+     * Set content_assert
+     *
+     * @param array $contentAssert
+     * @return Post
+     */
+    public function setContentAssert($contentAssert)
+    {
+        $this->content_assert = $contentAssert;
+
+        return $this;
     }
 }
